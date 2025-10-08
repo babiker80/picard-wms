@@ -12,11 +12,7 @@ import de.babiker.picard.wms.shipment.repository.ShipmentMapper;
 import de.babiker.picard.wms.shipment.repository.ShipmentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -30,7 +26,7 @@ public class ShipmentService {
     private final ShipmentMapper shipmentMapper;
 
     @Transactional
-    public ShipmentEntity createShipmentForOrder(UUID orderId) {
+    public ShipmentDto createShipmentForOrder(UUID orderId) {
 
         // pro Auftrag maximal EINE Sendung
         OrderEntity order = orderRepo.findById(orderId).orElseThrow();
@@ -48,7 +44,7 @@ public class ShipmentService {
         p.setShipment(s);
         packageRepo.save(p);
 
-        return s;
+        return shipmentMapper.toShipmentDto(s);
     }
 
     // Paket labeln (tracking)
@@ -68,7 +64,7 @@ public class ShipmentService {
 
     //Packen
     @Transactional
-    public ShipmentEntity packShipment(UUID shipmentId) {
+    public ShipmentDto packShipment(UUID shipmentId) {
         ShipmentEntity s = shipmentRepo.findById(shipmentId).orElseThrow();
 
         boolean allLabeled = s.getPackages() != null &&
@@ -82,12 +78,12 @@ public class ShipmentService {
             throw new IllegalStateException("Invalid status for pack");
         }
         s.setStatus(ShipmentStatus.PACKED);
-        return shipmentRepo.save(s);
+        return shipmentMapper.toShipmentDto(shipmentRepo.save(s));
     }
 
     //Versand
     @Transactional
-    public ShipmentEntity shipShipment(UUID shipmentId) {
+    public ShipmentDto shipShipment(UUID shipmentId) {
         ShipmentEntity s = shipmentRepo.findById(shipmentId).orElseThrow();
         if (s.getStatus() != ShipmentStatus.PACKED) throw new
                 IllegalStateException("Shipment not packed");
@@ -100,7 +96,7 @@ public class ShipmentService {
         s.setStatus(ShipmentStatus.SHIPPED);
         //Speichern von Versandzeitpunkt
         s.setShippedAt(OffsetDateTime.now());
-        return shipmentRepo.save(s);
+        return shipmentMapper.toShipmentDto(shipmentRepo.save(s));
     }
 
     public ShipmentDetailDto getShipmentDetail(UUID id) {
@@ -108,11 +104,6 @@ public class ShipmentService {
                 .orElseThrow(() -> new EntityNotFoundException("shipment not found"));
         return shipmentMapper.toDetailDto(shipment);
     }
-
-//    public List<ShipmentDetailDto> search(String status, String carrier) {
-//        return (shipmentRepo.search(status, carrier)).stream().map(s-> shipmentMapper.toDetailDto(s)).toList();
-//    }
-
 
     public List<ShipmentDetailDto> searchShipments(String status, String carrier) {
         ShipmentStatus s = status != null ? ShipmentStatus.valueOf(status) : null;

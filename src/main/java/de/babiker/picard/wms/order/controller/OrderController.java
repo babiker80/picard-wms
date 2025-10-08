@@ -3,9 +3,8 @@ package de.babiker.picard.wms.order.controller;
 import de.babiker.picard.wms.order.OrderEntity;
 import de.babiker.picard.wms.order.dto.CreateOrderRequest;
 import de.babiker.picard.wms.order.dto.OrderDto;
-import de.babiker.picard.wms.order.repository.OrderMapper;
-import de.babiker.picard.wms.order.repository.OrderRepository;
 import de.babiker.picard.wms.order.service.OrderService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,6 @@ import java.util.UUID;
 public class OrderController {
 
     private final OrderService orderService;
-    private final OrderRepository orderRepo;
 
     //Auftrag erfassen
     @PostMapping
@@ -30,9 +28,9 @@ public class OrderController {
         e.setDeliveryAddress(req.deliveryAddress());
         e.setPositions(req.positions());
         try {
-            OrderEntity saved = orderService.createOrder(e);
+            OrderDto saved = orderService.createOrder(e);
             return ResponseEntity.created(URI.create("/api/orders/" +
-                    saved.getId())).body(OrderMapper.toOrderDto(saved));
+                    saved.id())).body(saved);
         } catch (IllegalStateException ex) {
             return ResponseEntity.status(HttpStatus.CONFLICT.value()).build(); //409
         }
@@ -41,8 +39,11 @@ public class OrderController {
     //Detailabfrage: Auftrag
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrder(@PathVariable UUID id) {
-        return orderRepo.findById(id).map(o ->
-                ResponseEntity.ok(OrderMapper.toOrderDto(o))).orElseGet(() ->
-                ResponseEntity.notFound().build());
+        try {
+            return ResponseEntity.ok(orderService.getOrderDetail(id));
+        }
+        catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

@@ -3,7 +3,6 @@ package de.babiker.picard.wms.order;
 import de.babiker.picard.wms.address.AddressEntity;
 import de.babiker.picard.wms.customer.CustomerEntity;
 import de.babiker.picard.wms.enums.OrderStatus;
-import de.babiker.picard.wms.enums.ShipmentStatus;
 import de.babiker.picard.wms.orderitem.OrderItemEntity;
 import de.babiker.picard.wms.shipment.ShipmentEntity;
 import jakarta.persistence.*;

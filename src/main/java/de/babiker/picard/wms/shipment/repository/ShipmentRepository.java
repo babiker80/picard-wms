@@ -2,7 +2,6 @@ package de.babiker.picard.wms.shipment.repository;
 
 import de.babiker.picard.wms.enums.ShipmentStatus;
 import de.babiker.picard.wms.shipment.ShipmentEntity;
-import de.babiker.picard.wms.shipment.dto.ShipmentDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

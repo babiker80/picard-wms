@@ -1,9 +1,8 @@
 package de.babiker.picard.wms.shipment.controller;
 
 import de.babiker.picard.wms.shipment.dto.ShipmentDetailDto;
-import de.babiker.picard.wms.shipment.repository.ShipmentMapper;
-import de.babiker.picard.wms.shipment.repository.ShipmentRepository;
 import de.babiker.picard.wms.shipment.service.ShipmentService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,14 +17,12 @@ import java.util.UUID;
 public class ShipmentController {
 
     private final ShipmentService shipmentService;
-    private final ShipmentRepository shipmentRepo;
 
     //Sendung (aus Auftrag) erzeugen
     @PostMapping("/orders/{orderId}")
     public ResponseEntity<?> createShipment(@PathVariable UUID orderId) {
         try {
-            var s = shipmentService.createShipmentForOrder(orderId);
-            return ResponseEntity.status(HttpStatus.CREATED.value()).body(ShipmentMapper.toShipmentDto(s)); //201
+            return ResponseEntity.status(HttpStatus.CREATED.value()).body(shipmentService.createShipmentForOrder(orderId)); //201
         } catch (IllegalStateException ex) {
             return ResponseEntity.status(HttpStatus.CONFLICT.value()).body(ex.getMessage()); //409
         }
@@ -34,10 +31,12 @@ public class ShipmentController {
     //Detailabfrage: Sendung
     @GetMapping("/{id}")
     public ResponseEntity<?> getShipment(@PathVariable UUID id) {
-//        return shipmentRepo.findById(id).map(s ->
-//                ResponseEntity.ok(ShipmentMapper.toDetailDto(s))).orElseGet(() ->
-//                ResponseEntity.notFound().build());
-        return ResponseEntity.ok(shipmentService.getShipmentDetail(id));
+        try {
+            return ResponseEntity.ok(shipmentService.getShipmentDetail(id));
+        }
+        catch(EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT.value()).body(ex.getMessage()); //409
+        }
     }
 
     @GetMapping("/shipments")
@@ -50,7 +49,7 @@ public class ShipmentController {
     @PutMapping("/{id}/pack")
     public ResponseEntity<?> pack(@PathVariable UUID id) {
         try {
-            return ResponseEntity.ok(ShipmentMapper.toShipmentDto(shipmentService.packShipment(id)));
+            return ResponseEntity.ok(shipmentService.packShipment(id));
         }
         catch (IllegalStateException ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
@@ -60,7 +59,7 @@ public class ShipmentController {
     @PutMapping("/{id}/ship")
     public ResponseEntity<?> ship(@PathVariable UUID id) {
         try {
-            return ResponseEntity.ok(ShipmentMapper.toShipmentDto(shipmentService.shipShipment(id)));
+            return ResponseEntity.ok(shipmentService.shipShipment(id));
         }
         catch (IllegalStateException ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());

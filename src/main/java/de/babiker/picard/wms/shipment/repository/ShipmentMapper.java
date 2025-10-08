@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
 
 public class ShipmentMapper {
 
-    public static ShipmentDto toShipmentDto(ShipmentEntity s) {
+    public ShipmentDto toShipmentDto(ShipmentEntity s) {
         List<PackageDto> packages = s.getPackages() == null ? java.util.List.of() :
                 s.getPackages().stream()
                 .map(p -> new PackageDto(p.getId(), p.getTrackingCode(),
-                        p.getCarrier())).collect(Collectors.toList());
+                        p.getCarrier())).toList();
 
         return new ShipmentDto(s.getId(), s.getStatus().name(),
                 s.getShippedAt(), packages);
@@ -24,7 +24,7 @@ public class ShipmentMapper {
         List<PackageDto> packages = s.getPackages() == null ? java.util.List.of() :
                 s.getPackages().stream()
                         .map(p -> new PackageDto(p.getId(), p.getTrackingCode(),
-                                p.getCarrier())).collect(Collectors.toList());
+                                p.getCarrier())).toList();
 
         return new ShipmentDetailDto(s.getId(), s.getStatus().name(),
                 s.getShippedAt(), s.getOrder().getId().toString(), packages);
