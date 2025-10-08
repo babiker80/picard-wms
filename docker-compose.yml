@@ -1,0 +1,42 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: wmsuser
+      POSTGRES_PASSWORD: wmspassword
+      POSTGRES_DB: wmsdb
+    ports:
+      - "5432:5432"
+#    volumes:
+#      - pgdata:/var/lib/postgresql/data
+#volumes:
+#  pgdata:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wms"]
+      interval: 5s
+      retries: 5
+
+
+  flyway:
+    image: flyway/flyway:10
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: -url=jdbc:postgresql://postgres:5432/wmsdb -user=wmsuser -password=wmspassword -locations=filesystem:/flyway/sql migrate
+    volumes:
+      - ./src/main/resources/db/migration:/flyway/sql
+
+
+  app:
+    build: .
+    container_name: wms_app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/wmsdb
+      SPRING_DATASOURCE_USERNAME: wmsuser
+      SPRING_DATASOURCE_PASSWORD: wmspassword
+    ports:
+      - "8080:8080"
+    depends_on:
+      flyway:
+        condition: service_completed_successfully

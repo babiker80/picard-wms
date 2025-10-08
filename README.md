@@ -1,4 +1,5 @@
-# picard-wms (WMS Shipping MVP)
+# WMS Shipping MVP
+
 Ein Minimal Viable Product (MVP) für einen einfachen Versandprozess in einem Warehouse Management System (WMS).
 
 ---

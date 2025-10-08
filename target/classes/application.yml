@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: picard.wms
+  datasource:
+    url: jdbc:postgresql://localhost:5432/wmsdb
+    username: wmsuser
+    password: wmspassword
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+      javax:
+        persistence:
+          schema-generation:
+            scripts:
+              action: create
+              create-target: create.sql
+              create-source: metadata
+server:
+  port: 8080
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
