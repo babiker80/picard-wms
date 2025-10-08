@@ -34,7 +34,7 @@ Technologien:
 
 ### 1️ Repository klonen oder entpacken
 
-git clone https://github.com/<user>/wms-shipping-mvp.git
+git clone https://github.com/babiker80/picard-wms.git
 cd wms-shipping-mvp
 
 ### 2 Datenbank starten (PostgreSQL via Docker)
@@ -133,3 +133,4 @@ mvn test
 
 Dieses Projekt ist zu Lern- und Demonstrationszwecken gedacht.
 (c) 2025 – Open Source Example (MIT License)
+
